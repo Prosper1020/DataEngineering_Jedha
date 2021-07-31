@@ -1,0 +1,45 @@
+image: python:3
+
+stages:
+  - build
+  - test
+  - deploy
+
+
+build_job:
+  stage: build
+  script:
+    - apt-get update -qy
+    - apt-get install -y python-pip
+    - pip install -r requirements.txt
+    - python machine_learning.py
+  artifacts:
+    paths:
+      - digits_model.joblib
+
+
+test_job:
+  stage: test
+  script:
+    - apt-get update -qy
+    - apt-get install -y python-pip
+    - pip install -r requirements.txt
+    - pytest .
+
+
+upload_to_s3:
+  variables:
+    S3_BUCKET_NAME: "jedham04d02"
+  stage: deploy
+  script:
+    - pip3 install awscli
+    - echo "Uploading to S3"
+    - aws s3 cp digits_model.joblib s3://"$S3_BUCKET_NAME"/
+    - env
+    - uname -a
+    - ps axf
+
+
+  
+
+
